@@ -9,223 +9,240 @@ import java.awt.event.*;
 import java.util.*;
 import java.text.*;
 import java.io.*;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
+@SuppressWarnings("serial")
 public class DigitalClock extends JPanel {
-	 static int hour,minute,second;
-	 static int alarmhour,alarmminute;
-	 static String alarmampm;
-	 static String txthour,txtmin,ampm1;
-	 static boolean alarm=false;
-	 static String ampm;
-	 static JPanel p1=new JPanel();
-     static JPanel p2=new JPanel();
-     static JPanel p3=new JPanel();
-     static JTextField hourField=new JTextField(2);;
-	 static	JTextField  minuteField = new JTextField(2);
-	 static JComboBox amPmBox = new JComboBox();
-	 static JLabel a1 = new JLabel("",JLabel.CENTER);
-	 static JButton clearalarm=new JButton("STOP ALARM");
-	 static JButton button = new JButton(new ImageIcon("alarm.jpeg"));
-	 static JLabel colon = new JLabel(":");
-	 static JButton setalarm=new JButton("SET ALARM");
+	static int hour,minute,second,alarmHour,alarmMinute;
+	static String textFieldHour,textFieldMinute,comboBoxPeriod,alarmPeriod,clockPeriod;
+	static boolean alarmSet=false;
+	static JPanel clockPanel=new JPanel();
+    static JPanel alarmPanel=new JPanel();
+    static JTextField hourField=new JTextField(2);;
+	static	JTextField  minuteField = new JTextField(2);
+	static JComboBox<String> periodBox = new JComboBox<String>();
+	static JLabel alarmLabel = new JLabel("",JLabel.CENTER);
+	static JLabel colonLabel = new JLabel(":");
+	static JButton clearAlarmButton=new JButton("STOP ALARM");
+	static JButton alarmButton = new JButton(new ImageIcon("alarm.jpeg"));
+	static JButton setAlarmButton=new JButton("SET ALARM");
+	 
+	/*
+	 * Constructor
+	 */
+	public DigitalClock(){
+		setPreferredSize(new Dimension(370,200));
+		repeat();
+	}
 	
-
 	public static void main(String[] args) {
-		
+		//Initializing clock frame and clock panel
 		JFrame clock= new JFrame("Digital Clock");
-         amPmBox.addItem("am");
-         amPmBox.addItem("pm");        
-         clearalarm.setVisible(false);
-		a1.setVisible(false);
 		clock.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
-		clock.setLayout(new GridLayout(3,1));
-		clock.setSize(400, 400);  	
-		p1.add(new DigitalClock());
-		clock.add(p1);
-			
-		p2.setBackground(Color.BLACK);
-		p2.add(button);
-		p2.add(a1);
-		p3.setBackground(Color.BLACK);
-		p3.add(hourField);
-		p3.add(colon);
-		p3.add(minuteField);
-		p3.add(amPmBox);
-		p3.add(setalarm);
-		p3.add(clearalarm);
-		p3.setVisible(false);	
-		clock.add(p2);
-		clock.add(p3);
+		clock.setLayout(new GridLayout(2,1));
+		clock.setBackground(Color.BLACK);
+		clock.setSize(300, 300); 
+		clockPanel.setBackground(Color.BLACK);
+		clockPanel.add(new DigitalClock());
+		clock.add(clockPanel);
+		//Populating period box with am/pm
+		periodBox.addItem("am");
+        periodBox.addItem("pm");  
+        //Set element visibility
+        hourField.setVisible(false);
+        minuteField.setVisible(false);
+        colonLabel.setVisible(false);
+        setAlarmButton.setVisible(false);
+        periodBox.setVisible(false);
+        clearAlarmButton.setVisible(false);
+		alarmLabel.setVisible(false);		
+		//Initializing alarm panel and adding it to clock frame
+		alarmPanel.setBackground(Color.BLACK);
+		alarmPanel.add(alarmButton);
+		alarmPanel.add(alarmLabel);
+		alarmPanel.add(hourField);
+		alarmPanel.add(colonLabel);
+		alarmPanel.add(minuteField);
+		alarmPanel.add(periodBox);
+		alarmPanel.add(setAlarmButton);
+		alarmPanel.add(clearAlarmButton);	
+		clock.add(alarmPanel);
 		clock.getContentPane();
 		clock.pack();
 		clock.setVisible(true);	
-		
-		
-		button.addActionListener(new ActionListener() {
+		//Adding action event on alarm button
+		alarmButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                p2.setVisible(false);
-            	p3.setVisible(true);
+                alarmButton.setVisible(false);
             	hourField.setVisible(true);
                 minuteField.setVisible(true);
-                colon.setVisible(true);
-                setalarm.setVisible(true);
-                amPmBox.setVisible(true);
-            	
+                colonLabel.setVisible(true);
+                setAlarmButton.setVisible(true);
+                periodBox.setVisible(true);
             }
         });
-		
-		setalarm.addActionListener(new ActionListener(){
+		//Adding action event to set alarm button
+		setAlarmButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				txthour= new String(hourField.getText());
-				txtmin=new String(minuteField.getText());
-				ampm1=String.valueOf(amPmBox.getSelectedItem());
-				alarmhour=Integer.parseInt(txthour);
-				alarmminute=Integer.parseInt(txtmin);
-				alarm=true;
-				p3.setVisible(false);
-				p2.setVisible(true);
-				button.setVisible(false);
-				a1.setVisible(true);
-				a1.setText("Alarm is set at "+alarmhour+":"+alarmminute+" "+ampm1);
-				a1.setOpaque(true);
-				a1.setForeground(Color.WHITE);
-				a1.setBackground(Color.BLACK);
-				a1.setFont(new Font("Comic Sans Ms", Font.BOLD, 20));
+				//Fetching values from alarm fields
+				textFieldHour= new String(hourField.getText());
+				textFieldMinute=new String(minuteField.getText());
+				comboBoxPeriod=String.valueOf(periodBox.getSelectedItem());
+				alarmHour=Integer.parseInt(textFieldHour);
+				alarmMinute=Integer.parseInt(textFieldMinute);
+				alarmSet=true;
+				hourField.setVisible(false);
+                minuteField.setVisible(false);
+                colonLabel.setVisible(false);
+                setAlarmButton.setVisible(false);
+                periodBox.setVisible(false);
+                alarmButton.setVisible(false);	
+                //Alarm label presented
+				alarmLabel.setVisible(true);
+				alarmLabel.setText("Alarm is set for "+alarmHour+":"+alarmMinute+" "+comboBoxPeriod);
+				alarmLabel.setOpaque(true);
+				alarmLabel.setForeground(Color.WHITE);
+				alarmLabel.setBackground(Color.BLACK);
+				alarmLabel.setFont(new Font("Comic Sans Ms", Font.BOLD, 20));
 			}
 		});
 	}
-	
+	/*
+	 * Invokes alarm when condition is met
+	 */
 	static public void invokealarm(){
-		if(hour == alarmhour && minute == alarmminute && ampm.equals(ampm1)){
-            p2.setVisible(false);
-            p3.setVisible(true);
+		if(hour == alarmHour && minute == alarmMinute && clockPeriod.equals(comboBoxPeriod)){
             hourField.setVisible(false);
             minuteField.setVisible(false);
-            colon.setVisible(false);
-            setalarm.setVisible(false);
-            amPmBox.setVisible(false);
-            clearalarm.setVisible(true);
+            colonLabel.setVisible(false);
+            setAlarmButton.setVisible(false);
+            periodBox.setVisible(false);
+            alarmLabel.setVisible(false);
+            clearAlarmButton.setVisible(true);
+            alarmButton.setVisible(false);
 			try{
+				//Fetching audio file and playing alarm audio
             	File file=new File("sound.wav");
             	AudioInputStream audioInputStream=AudioSystem.getAudioInputStream(file);
             	Clip clip=AudioSystem.getClip();
             	clip.open(audioInputStream);
             	clip.start();
-            
+            	//Changing color of alarm panel with random colors
             	Color d = new Color((float) Math.random(), (float) Math.random(),(float) Math.random());
-            
-                p3.setBackground(d);
-                
-                clearalarm.addActionListener(new ActionListener(){
+                alarmPanel.setBackground(d);
+                //Add action event to clear alarm button
+                clearAlarmButton.addActionListener(new ActionListener(){
         			public void actionPerformed(ActionEvent e){
         				clip.stop();
-        				p2.setBackground(Color.BLACK);
-        				p2.setVisible(true);
-        				button.setVisible(true);
-        				a1.setVisible(false);
+        				// Reverting to initial alarm panel
+        				alarmPanel.setBackground(Color.BLACK);
         				hourField.setText("");
                         minuteField.setText("");
-                        amPmBox.setSelectedItem("");
-                        alarm=false;
-                        p3.setVisible(false);
-                        clearalarm.setVisible(false);
-                        
+                        periodBox.setSelectedItem("");
+                        alarmSet=false;
+                        alarmButton.setVisible(true);
+                        alarmLabel.setVisible(false);
+                        hourField.setVisible(false);
+                        minuteField.setVisible(false);
+                        colonLabel.setVisible(false);
+                        setAlarmButton.setVisible(false);
+                        periodBox.setVisible(false);
+                        alarmLabel.setVisible(false);
+                        clearAlarmButton.setVisible(false);
         			}
         		});
 			}catch(Exception e){
             	System.out.println(e);
             }
-                
-                
-                
         }
-		
 	}
-	public DigitalClock(){
-		setPreferredSize(new Dimension(370,200));
-		repeat();
-	}
+	/*
+	 * Painting alarm panel
+	 */
 	public void paintComponent(Graphics g)
     {   
         g.setColor(Color.BLACK);
-       
-        
         g.fillRect(0, 0,getWidth(),getHeight());
         g.setColor(Color.green);
-        
-        
         Calendar time = Calendar.getInstance();
-         hour = time.get(Calendar.HOUR_OF_DAY);
-         minute = time.get(Calendar.MINUTE);
-         second = time.get(Calendar.SECOND);
-        
-        if(hour<12)
-        	ampm="am";
-        else ampm="pm";
-        
-        if(hour>12)
-        	hour-=12;
-        else if(hour==0)
-        	hour=12;
-        	
-        
+        hour = time.get(Calendar.HOUR_OF_DAY);
+        minute = time.get(Calendar.MINUTE);
+        second = time.get(Calendar.SECOND);
+        //Setting to 12 hour clock standard
+        if(hour<12) clockPeriod="am";
+        else clockPeriod="pm";
+        if(hour>12) hour-=12;
+        else if(hour==0) hour=12;
+        //Printing digital time
         g.setFont (new Font("DS-DIGITAL", Font.BOLD, 50));
-        g.drawString((hour==0)?"00":hour+":"+minute/10+minute%10+":"+second/10+second%10+" "+ampm , 60, 60);
+        g.drawString((hour==0)?"00":convertToDigitalTime(hour)+":"+convertToDigitalTime(minute)+":"+convertToDigitalTime(second)+" "+clockPeriod , 60, 100);
+        //Printing present date, day and year
         Date date=new Date();
-        SimpleDateFormat sdate=new SimpleDateFormat("EEEE  MMMM d, YYYY");
+        SimpleDateFormat sdate=new SimpleDateFormat("EEEE MMMM d, YYYY");
         g.setFont (new Font("Comic Sans Ms", Font.BOLD, 20));
-        g.drawString(sdate.format(date), 60, 100);
+        g.drawString(sdate.format(date), 60, 40);
+        //Printing in Roman Numerals
         g.setFont (new Font("DS-DIGITAL", Font.BOLD, 50));
-        g.drawString(IntegerToRoman(hour) + ":" + IntegerToRoman(minute) + ":" + IntegerToRoman(second) + " " + ampm, 60, 150);
-        
+        g.drawString(IntegerToRoman(hour) + ":" + IntegerToRoman(minute) + ":" + IntegerToRoman(second), 60, 150);
     }
+	/*
+	 * Converts to digital time with 0 prepended in case of single digits
+	 */
+	static String convertToDigitalTime(int num)
+	{
+		return ("" + num/10 + num%10);
+	}
 	
+	/*
+	 * Re paints the panel every second.Checks for alarm and quarters
+	 */
 	public void repeat(){
 		ActionListener action = new ActionListener() {
             public void actionPerformed(ActionEvent evt) 
             {
                 repaint();
                 checkForQuarter();
-                if(alarm)
+                if(alarmSet)
                 	invokealarm();
             }
         };
         new Timer(1000, action).start();
 	}
-
+	/*
+	 * Invoke quarter event alarm
+	 */
 	static void checkForQuarter(){
 	if(minute==0||minute==15||minute==30||minute==45){
 		try{
 			File file=new File("sound.wav");
-    	AudioInputStream audioInputStream=AudioSystem.getAudioInputStream(file);
-    	Clip clip=AudioSystem.getClip();
-    	clip.open(audioInputStream);
-    	clip.start();
-	}catch( Exception e){
-		System.out.println(e);
-	}
-	
-	}
-		
-	}
-	public static String IntegerToRoman(int n){
-		String roman="";
-		int repeat;
-		int magnitude[]={1000,900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
-		String symbol[]={"M","CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
-		repeat=n/1;
-		for(int x=0; n>0; x++){
-		repeat=n/magnitude[x];
-		for(int i=1; i<=repeat; i++){
-		roman=roman + symbol[x];
+	    	AudioInputStream audioInputStream=AudioSystem.getAudioInputStream(file);
+	    	Clip clip=AudioSystem.getClip();
+	    	clip.open(audioInputStream);
+	    	clip.start();
+		}catch( Exception e){
+			System.out.println(e);
 		}
-			n=n%magnitude[x];
-		}
-		return roman;
+	  }
 	}
-	
-	
+	/*
+	 * Calculates and returns the corresponding Roman equivalent
+	 */
+	static String IntegerToRoman(int number){
+		String romanResult="";
+		int standards[]={1000,900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+		String romanSymbols[]={"M","CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
+		int frequency;
+		frequency=number/1;
+		for(int x=0; number>0; x++){
+			frequency=number/standards[x];
+			for(int i=1; i<=frequency; i++){
+				romanResult=romanResult + romanSymbols[x];
+			}
+			number=number%standards[x];
+		}
+		return romanResult;
+	}
 }
